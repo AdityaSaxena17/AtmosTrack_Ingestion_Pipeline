@@ -3,9 +3,10 @@ package com.example.flinkjob.Model;
 import lombok.Data;
 
 @Data
-public class CityAqiResult {
+public class AqiResult {
 
     private String city;
+    private String hotspot;
     private String timestamp;
     private long windowEndTS;
 

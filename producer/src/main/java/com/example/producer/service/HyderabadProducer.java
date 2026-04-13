@@ -24,7 +24,7 @@ public class HyderabadProducer implements CityProducerPort{
 
     private static final String CITY = "Hyderabad";
     private static final String FOLDER_PATH = "producer/src/main/resources/static/aqi_readings/Hyderabad";
-    private static final int BATCH_SIZE=10;
+    private static final int BATCH_SIZE=4;
     private static final DateTimeFormatter FORMATTER =DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private final OffsetStore offsetStore;
 

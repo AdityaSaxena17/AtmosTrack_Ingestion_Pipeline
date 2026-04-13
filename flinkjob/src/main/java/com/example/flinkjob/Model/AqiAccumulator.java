@@ -2,8 +2,8 @@ package com.example.flinkjob.Model;
 
 public class AqiAccumulator {
 
-    public String city;
 
+    public String city;
     // 🔹 AQI
     public Integer aqi=0;
     public Integer count=0;

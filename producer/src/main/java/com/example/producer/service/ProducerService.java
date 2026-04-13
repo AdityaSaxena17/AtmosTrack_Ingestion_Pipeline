@@ -38,7 +38,7 @@ public class ProducerService {
         offsetStore.putAll(fileOffSetRepository.loadAll());
     }
 
-    @Scheduled(fixedDelay = 5000)
+    @Scheduled(fixedDelay = 1000)
     public void produce() throws InterruptedException{
 
         long start=System.currentTimeMillis();
@@ -63,7 +63,7 @@ public class ProducerService {
         CompletableFuture.runAsync(()->{
             offsetStore.persist();
         },executorService);
-        log.info("Batch completed in {} ms",System.currentTimeMillis()-start);
+        log.info("Batch completed in {} ms with batch size {}",System.currentTimeMillis()-start,readings.size());
         
         
     }

@@ -44,9 +44,16 @@ public class AqiRealTimeJob {
 
         readings
             .keyBy((reading)->reading.getCity())
-            .window(TumblingProcessingTimeWindows.of(Time.minutes(1)))
-            .aggregate(new Aggregator(), new AqiCalculator())
-            .addSink(new RedisSink());
+            .window(TumblingProcessingTimeWindows.of(Time.seconds(10)))
+            .aggregate(new Aggregator(), new AqiCalculator("City"))
+            .addSink(new RedisSink("City"));
+
+
+        readings
+            .keyBy((reading)->reading.getCity()+":"+reading.getHotspot())
+            .window(TumblingProcessingTimeWindows.of(Time.seconds(10)))
+            .aggregate(new Aggregator(), new AqiCalculator("Hotspot"))
+            .addSink(new RedisSink("Hotspot"));
 
         env.execute("AQI Flink Job");
     }

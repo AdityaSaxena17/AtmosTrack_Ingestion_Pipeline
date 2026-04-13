@@ -9,12 +9,21 @@ import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
 
 import com.example.flinkjob.Model.AqiAccumulator;
-import com.example.flinkjob.Model.CityAqiResult;
+import com.example.flinkjob.Model.AqiResult;
 import com.example.flinkjob.Model.Reading;
 
-public class AqiCalculator extends ProcessWindowFunction<AqiAccumulator,CityAqiResult,String,TimeWindow>{
+import lombok.extern.slf4j.Slf4j;
 
-    public int computeAqi(CityAqiResult result) {
+@Slf4j
+public class AqiCalculator extends ProcessWindowFunction<AqiAccumulator,AqiResult,String,TimeWindow>{
+
+    private String type;
+
+    public AqiCalculator(String type){
+        this.type=type;
+    }
+
+    public Integer computeAqi(AqiResult result) {
 
         int maxAqi = 0;
 
@@ -107,17 +116,27 @@ public class AqiCalculator extends ProcessWindowFunction<AqiAccumulator,CityAqiR
 
     @Override
     public void process(String key,
-            ProcessWindowFunction<AqiAccumulator, CityAqiResult, String, TimeWindow>.Context context,
-            Iterable<AqiAccumulator> elements, Collector<CityAqiResult> out) throws Exception {
+            ProcessWindowFunction<AqiAccumulator, AqiResult, String, TimeWindow>.Context context,
+            Iterable<AqiAccumulator> elements, Collector<AqiResult> out) throws Exception {
 
         AqiAccumulator acc = elements.iterator().next();
 
         if (acc.count == 0) return;
 
-        CityAqiResult result = new CityAqiResult();
-
-        result.setCity(key);
+        AqiResult result = new AqiResult();
+        
+        if("Hotspot".equals(type)){
+            String[] ch_pair=key.split(":");
+            result.setCity(ch_pair[0]);
+            result.setHotspot(ch_pair[1]);
+        }
+        else{
+            result.setHotspot("ALL");
+            result.setCity(key);
+        }
+        
         result.setCount(acc.count);
+
 
         result.setPm25(acc.pm25 / acc.count);
         result.setPm10(acc.pm10 / acc.count);
@@ -149,7 +168,7 @@ public class AqiCalculator extends ProcessWindowFunction<AqiAccumulator,CityAqiR
         result.setVerticalWindSpeed(acc.verticalWindSpeed / acc.count);
 
         
-        int aqi = computeAqi(result);
+        Integer aqi = computeAqi(result);
         result.setWindowEndTS(context.window().getEnd());
         DateTimeFormatter formatter=DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String readable = Instant.ofEpochMilli(result.getWindowEndTS()).atZone(ZoneId.systemDefault()).format(formatter);
@@ -157,6 +176,13 @@ public class AqiCalculator extends ProcessWindowFunction<AqiAccumulator,CityAqiR
         result.setTimestamp(readable);
 
         result.setAqi(aqi);
+
+
+        log.info("city={}, records={}, windowEnd={} , at {}", 
+         acc.city,
+         acc.count, 
+         readable,
+        java.time.LocalDateTime.now());
 
         out.collect(result);
     }

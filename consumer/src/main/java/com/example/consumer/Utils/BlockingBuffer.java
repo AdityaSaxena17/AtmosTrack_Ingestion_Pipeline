@@ -26,7 +26,7 @@ public class BlockingBuffer {
 
     private final BlockingQueue<Reading> queue = new LinkedBlockingQueue<>(10000);
 
-    private static final int BATCH_SIZE = 500;
+    private static final int BATCH_SIZE = 1000;
     private static final int TIME_OUT_MS = 5000;
 
     @PostConstruct
@@ -50,7 +50,7 @@ public class BlockingBuffer {
                 while(batch.size()<BATCH_SIZE && System.currentTimeMillis()<deadline){
                     queue.drainTo(batch, BATCH_SIZE - batch.size());
                     Long timeRemaining=deadline-System.currentTimeMillis();
-                    if(timeRemaining<=0){
+                    if(timeRemaining<=0 || batch.size()>=BATCH_SIZE){
                         break;                        
                     }
                     Reading nextReading=queue.poll(timeRemaining,TimeUnit.MILLISECONDS);

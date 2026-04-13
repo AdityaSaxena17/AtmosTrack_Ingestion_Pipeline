@@ -10,8 +10,8 @@ public class Aggregator implements AggregateFunction<Reading,AqiAccumulator,AqiA
     @Override
     public AqiAccumulator add(Reading reading, AqiAccumulator acc) {
 
-        if (acc.city == null) {
-            acc.city = reading.getCity();
+        if(acc.city==null){
+            acc.city=reading.getCity();
         }
 
         acc.count++;
